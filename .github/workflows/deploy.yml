@@ -20,3 +20,18 @@ jobs:
       - run: docker push receronp/multi-nginx-231020
       - run: docker push receronp/multi-server-231020
       - run: docker push receronp/multi-worker-231020
+
+      - name: Generate deployment package
+        run: zip -r deploy.zip . -x '*.git*'
+
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v21
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
+          application_name: multi-gh
+          environment_name: Multi-gh-env
+          existing_bucket_name: elasticbeanstalk-us-east-1-204592042107
+          region: us-east-1
+          version_label: ${{ github.sha }}
+          deployment_package: deploy.zip

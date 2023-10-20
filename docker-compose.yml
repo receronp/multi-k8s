@@ -1,63 +1,37 @@
 version: "3"
 
 services:
-  postgres:
-    image: "postgres:latest"
-    environment:
-      - POSTGRES_PASSWORD=postgres_password
-
-  redis:
-    image: "redis:latest"
-
   proxy:
     restart: always
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile.dev
+    image: "receronp/multi-nginx-231020"
+    mem_limit: 128m
     depends_on:
       - api
       - client
     ports:
-      - "3050:80"
+      - "80:80"
 
   api:
-    build:
-      dockerfile: Dockerfile.dev
-      context: ./server
-    depends_on:
-      - postgres
-      - redis
-    volumes:
-      - /app/node_modules
-      - ./server:/app
+    image: "receronp/multi-server-231020"
+    mem_limit: 128m
     environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - PG_USER=postgres
-      - PG_HOST=postgres
-      - PG_DATABASE=postgres
-      - PG_PASSWORD=postgres_password
-      - PG_PORT=5432
+      - REDIS_HOST=$REDIS_HOST
+      - REDIS_PORT=$REDIS_PORT
+      - PG_USER=$PG_USER
+      - PG_HOST=$PG_HOST
+      - PG_DATABASE=$PG_DATABASE
+      - PG_PASSWORD=$PG_PASSWORD
+      - PG_PORT=$PG_PORT
 
   client:
-    build:
-      dockerfile: Dockerfile.dev
-      context: ./client
+    image: "receronp/multi-client-231020"
+    mem_limit: 128m
     depends_on:
       - api
-    volumes:
-      - /app/node_modules
-      - ./client:/app
 
   worker:
-    build:
-      dockerfile: Dockerfile.dev
-      context: ./worker
-    depends_on:
-      - redis
-    volumes:
-      - /app/node_modules
-      - ./worker:/app
+    image: "receronp/multi-worker-231020"
+    mem_limit: 128m
     environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - REDIS_HOST=$REDIS_HOST
+      - REDIS_PORT=$REDIS_PORT
