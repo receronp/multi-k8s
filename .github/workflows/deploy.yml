@@ -1,0 +1,22 @@
+name: Deploy MultiDocker
+on:
+  push:
+    branches:
+      - main # check your repo, your default branch might be master!
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - run: docker build -t receronp/multi-client-231020 ./client
+      - run: docker build -t receronp/multi-nginx-231020 ./nginx
+      - run: docker build -t receronp/multi-server-231020 ./server
+      - run: docker build -t receronp/multi-worker-231020 ./worker
+
+      - run: docker push receronp/multi-client-231020
+      - run: docker push receronp/multi-nginx-231020
+      - run: docker push receronp/multi-server-231020
+      - run: docker push receronp/multi-worker-231020
